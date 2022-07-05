@@ -10,8 +10,6 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"errors"
-	"golang.org/x/text/encoding/simplifiedchinese"
-	"golang.org/x/text/transform"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -19,6 +17,9 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/text/transform"
 )
 
 // 联动优势
@@ -30,10 +31,10 @@ type umfRes struct {
 	Sign      string `json:"sign"`
 }
 
-func UmfPayApp(goodsId, goodsDesc, orderId, amount string) (umfRes, error) {
-	merId := MER_ID
+func (c *Config) UmfPayApp(goodsId, goodsDesc, orderId, amount string) (umfRes, error) {
+	merId := c.MER_ID
 	// 请求参数
-	urlStr := URL_STR
+	urlStr := c.URL_STR
 	data := make(map[string]string, 0)
 	// 协议参数
 	data1 := map[string]string{
@@ -46,7 +47,7 @@ func UmfPayApp(goodsId, goodsDesc, orderId, amount string) (umfRes, error) {
 	data2 := map[string]string{
 		// 商户编号
 		"mer_id":     merId,
-		"notify_url": NOTIFY_URL,
+		"notify_url": c.NOTIFY_URL,
 		// 商品信息
 		"goods_id":  goodsId,
 		"goods_inf": goodsDesc,
@@ -56,7 +57,7 @@ func UmfPayApp(goodsId, goodsDesc, orderId, amount string) (umfRes, error) {
 		"mer_date": time.Now().Format("20060102"),
 		"amt_type": "RMB",
 		"amount":   amount,
-		"user_ip":  SERVER_IP,
+		"user_ip":  c.SERVER_IP,
 	}
 	for k, v := range data1 {
 		data[k] = v
@@ -66,7 +67,7 @@ func UmfPayApp(goodsId, goodsDesc, orderId, amount string) (umfRes, error) {
 	}
 
 	// 签名
-	sign, err := GetSign(data)
+	sign, err := GetSign(data, c.PRIVATE_KEY)
 	if err != nil {
 		return umfRes{}, err
 	}
@@ -85,7 +86,7 @@ func UmfPayApp(goodsId, goodsDesc, orderId, amount string) (umfRes, error) {
 	res := resp[i[0]+9 : i[1]-1]
 
 	// 验签
-	err = UmfPayVerifySig(res)
+	err = UmfPayVerifySig(res, c.PRIVATE_KEY)
 	if err != nil {
 		return umfRes{}, err
 	}
@@ -97,7 +98,7 @@ func UmfPayApp(goodsId, goodsDesc, orderId, amount string) (umfRes, error) {
 		"orderId":   orderId,
 		"orderDate": time.Now().Format("20060102"),
 	}
-	sign, err = GetSign(signData)
+	sign, err = GetSign(signData, c.PRIVATE_KEY)
 	if err != nil {
 		return umfRes{}, err
 	}
@@ -113,7 +114,7 @@ func UmfPayApp(goodsId, goodsDesc, orderId, amount string) (umfRes, error) {
 }
 
 // 联动优势签名
-func GetSign(data map[string]string) ([]byte, error) {
+func GetSign(data map[string]string, PRIVATE_KEY string) ([]byte, error) {
 	// 获取待签名字符串
 	strSign := getSignStr(data)
 
@@ -132,7 +133,7 @@ func GetSign(data map[string]string) ([]byte, error) {
 
 // 联动优势验证签名
 // data: 传入参数，不能含有空格
-func UmfPayVerifySig(data string) error {
+func UmfPayVerifySig(data, PUBLIC_KEY string) error {
 	// 提取待签名数据，和sign
 	signed, sign, err := getSigned(data)
 	if err != nil {

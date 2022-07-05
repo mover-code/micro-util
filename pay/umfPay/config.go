@@ -1,38 +1,10 @@
 package umfPay
 
-const (
-	// 商户id
-	MER_ID = "53224"
-	// 下单请求地址
-	URL_STR = "http://pay.soopay.net/spay/pay/payservice.do"
-	// 回调地址
-	NOTIFY_URL = "139.159.155.240:8071/api/pay/umfPay/notify"
-	// 服务器ip地址
-	SERVER_IP = "139.159.155.240"
-)
-
-const (
-	// 联动优势公钥
-	PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDGWAu4p6aK1SiQqNKT1nTgYwA8
-cz0Rde9fRtmLJAx1QxLqrerAUVl/uuXV7NQFSkTipouo3cwEEpae89267AeLJBzK
-PbKnUID6JYGbwnq7CiRR4E244zcgqE8jo8DnkbH3KkiWonoUMD1uHy6TUFv5W7zr
-haz/E59MVmbzrp1TwwIDAQAB
------END PUBLIC KEY-----`
-	// 商户私钥
-	PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
-MIICXQIBAAKBgQC8OjfbHnv5kiTk78gdMBuanBF9A85HSBrBMOlB7fB5gweJMTod
-hakRCMfE9jHsjaAd+gpNbit3RS6pKXg+YzejjABcBtuyLEfSupmN7auwdzEG1tRN
-908M+sRQOPnEBhr8stswbYVARYWlSsC6GDHEDUkFSp1wzXO6mYsROwB+NwIDAQAB
-AoGAO7C+q9cz+4YT+yHrNQ5fgp1BkoKVdNdx3JgVMJozK2WZCzG4O0p6vfMp3tUw
-KdMT1s3HXJy2XgFrdau3/RjbuI8HL66gDLV/EYLRlhIzeTStj9z0rrXznv+oGVHD
-ULlPJcZO426lutX39vIJnnSEPIA97/yRhq/2S9iF/dEK0gECQQDrm/YZLZJM+7u2
-nypmTHtOQMewUTeIjRtpFc+5nfFPLnoLEH51rhKBfNKEk4dLqZwawkq4KHckm/uq
-7BofTyUBAkEAzIR9T1OMQwZI+k60iHL8JsX9dzxmbb5SpFRcYi6yeKWYk0++FQtA
-l0x/h9qjhGDTQcLTB2hiIfz1zDHf/+iLNwJBAOS+H1jkeJSLFfzAXL7C5DfeBsE0
-qLDHJmSIy4rPP7d7TPuvAMepv8e9cvlJ7eHUgn0sQrS2fK2rTtPrs5TQFwECQFw6
-OxA0ywHGqc5HA96si80oZ98HW+GNfFMiv+5+xHjnpGB6C2wOAPi5xKENFcQyrdHv
-+55Rkj9lhaqpqywKQA0CQQCPkCIzc5yy/gFWa8U8UOJvg2fZwphDCkt4zRB14ZoQ
-v8ypge1FtvrNI+bSIzqzmSYvzxlDjeNFtmhN4NucwSHn
------END RSA PRIVATE KEY-----`
-)
+type Config struct {
+	MER_ID      string `json:"mer_id"`
+	URL_STR     string `json:"url_str"`
+	NOTIFY_URL  string `json:"notify_url"`
+	SERVER_IP   string `json:"server_ip"`
+	PUBLIC_KEY  string `json:"public_key"`
+	PRIVATE_KEY string `json:"private_key"`
+}
