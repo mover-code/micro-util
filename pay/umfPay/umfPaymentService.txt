@@ -1,0 +1,162 @@
+package umfPay
+
+import (
+	"crypto"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha256"
+	"crypto/x509"
+	"cymul_api_go/lib/tools"
+	"encoding/base64"
+	"encoding/pem"
+	"errors"
+	"os"
+	"strings"
+)
+
+var publicKey = `-----BEGIN CERTIFICATE-----
+MIIDNDCCAp2gAwIBAgICLVkwDQYJKoZIhvcNAQEFBQAwPTEOMAwGA1UEBhMFQ0hJ
+TkExKzApBgNVBAMTIkNISU5BVEVMRUNPTSBDRVJUSUZJQ0FURSBBVVRIT1JJVFkw
+HhcNMDEwMzIxMTA0NzEzWhcNMDMwMzIxMTA0NzEzWjBcMQswCQYDVQQGEwJDTjER
+MA8GA1UEChMItPPBrLXn0MUxETAPBgNVBAgTCFNoZW55YW5nMRQwEgYDVQQDEwsx
+OTIuMTY4LjIuMjERMA8GA1UEBxMIU2hlbnlhbmcwgZ8wDQYJKoZIhvcNAQEBBQAD
+gY0AMIGJAoGBAMZYC7inporVKJCo0pPWdOBjADxzPRF1719G2YskDHVDEuqt6sBR
+WX+65dXs1AVKROKmi6jdzAQSlp7z3brsB4skHMo9sqdQgPolgZvCersKJFHgTbjj
+NyCoTyOjwOeRsfcqSJaiehQwPW4fLpNQW/lbvOuFrP8Tn0xWZvOunVPDAgMBAAGj
+ggEiMIIBHjAJBgNVHRMEAjAAMEYGA1UdHwQ/MD0wO6A5oDeGNWxkYXA6Ly8yMDIu
+MTAzLjY1LjE4L291PWNhLG91PXN5c3RlbSxvdT1jYTEsbz1jdCxjPUNOMC8GCCsG
+AQUFBwEBBCMwITAfBggrBgEFBQcwAYYTLDIwMi4xMDMuNjUuMTg6OTAwMzAPBghg
+hkgBhvhDDAQDAgEBMBIGCGCGSAGG+EMOBAYWBDI3RjkwGQYIYIZIAYb4QxAEDRYL
+MTkyLjE2OC4yLjIwEAYIYIZIAYb4QxEEBBYCTlQwGgYIYIZIAYb4QxkEDhYMOTe9
+ybfRt/7O8cb3MBkGCGCGSAGG+EMbBA0WCzE5Mi4xNjguMi4yMA8GCGCGSAGG+EMa
+BAMCAQMwDQYJKoZIhvcNAQEFBQADgYEAckkH/Vem5+kXPSGgkowjPwv47XXNbD0h
+GRMTVXm5PC2kY/wNApQh3lv7Tf5k3UQEoFBACxf6XJtuxf6S0uKBS4ySMKdpbMbO
+Uvtwu6ycQUQTRAs1EBgoh1zyuafU2D3iyHQM8etHxaSePXZOZXFkkvBJemyPz23H
+AyIn5SKQ2Es=
+-----END CERTIFICATE-----`
+
+//联动优势
+type Service struct {
+	MerId          string
+	PrivateKeyPath string
+}
+
+func NewUMFPayService(merId, path string) *Service {
+	return &Service{
+		MerId:          merId,
+		PrivateKeyPath: path,
+	}
+}
+
+//获取初始头
+func (s *Service) Init() map[string]string {
+	var params = make(map[string]string)
+	params["charset"] = "UTF-8"
+	params["sign_type"] = "RSA"
+	params["res_format"] = "HTML"
+	params["version"] = "4.0"
+	params["amt_type"] = "RMB"
+	return params
+}
+
+//------------数字签名------------
+func (s *Service) SignatureRSA(data []byte) (string, error) {
+
+	file, err := os.Open(s.PrivateKeyPath)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return "", err
+	}
+	buf := make([]byte, fileInfo.Size())
+	_, _ = file.Read(buf)
+	sh := crypto.SHA1.New()
+	sh.Write(data)
+	hash := sh.Sum(nil)
+	block, _ := pem.Decode(buf)
+	if block == nil {
+		return "", errors.New("private key error")
+	}
+	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return "", errors.New("ParsePKCS1PrivateKey error")
+	}
+	signature, err := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA1, hash)
+	return base64.StdEncoding.EncodeToString(signature), nil
+}
+
+//------------验证数字签名------------
+func (s *Service) VerifyRSA(plainText, sigText []byte, fileName string) bool {
+	//------1.获取公钥------
+	//Step1:打开文件获取公匙
+	file, err := os.Open(fileName)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+	fileinfo, err := file.Stat()
+	if err != nil {
+		panic(err)
+	}
+	buf := make([]byte, fileinfo.Size())
+	_, _ = file.Read(buf)
+	//Step2：将公匙反pem码化
+	block, _ := pem.Decode(buf)
+	//Step3:将公匙反x509序列化
+	pubInterface, _ := x509.ParsePKIXPublicKey(block.Bytes)
+	//Step4:执行公匙的类型断言
+	pulicKey := pubInterface.(*rsa.PublicKey)
+	//------2.获取明文的散列值------
+	//Step1:创建hash接口，指定采用的哈希函数
+	myHash := sha256.New()
+	//Step2:向myHash中写入内容
+	myHash.Write(plainText)
+	//Step3:生成明文的散列值
+	hashText := myHash.Sum(nil)
+	//------3.对数字签名后的内容进行解密------
+	/*
+		Step1:验证数字签名准确性
+		函数：:func VerifyPKCS1v15(pub *PublicKey, hash crypto.Hash, hashed []byte, sig []byte) (err error)
+		作用：验证数字签名准确性
+		返回参数1：error
+		参数1:公匙
+		参数2：指明采用的哈希函数
+		参数3：明文的散列值
+		参数4：数字签名后的内容
+	*/
+	err = rsa.VerifyPKCS1v15(pulicKey, crypto.SHA256, hashText, sigText)
+	if err != nil {
+		return false
+	} else {
+		return true
+	}
+}
+
+func (s *Service) DealWithResult(result string) (map[string]string, error) {
+	stringAttr := strings.Split(result, "&")
+	myMap := make(map[string]string)
+	var sign, plain string
+	for _, param := range stringAttr {
+		res := strings.Split(param, "=")
+		if res[0] == "sign_type" {
+			continue
+		}
+		if res[0] == "sign" {
+			sign = res[1] + "="
+		}
+		myMap[res[0]] = res[1]
+		plain = plain + param + "&"
+	}
+	plain = tools.RemoveLastRune(plain, 1)
+	ss := s.Verify([]byte(plain), []byte(sign))
+	if ss {
+		return myMap, nil
+	}
+	return nil, errors.New("验签失败")
+}
+func (s *Service) Verify(plainText, sigText []byte) bool {
+	return true
+}
