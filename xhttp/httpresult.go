@@ -2,7 +2,8 @@ package xhttp
 
 import (
 	"net/http"
-	"vid/util/xerr"
+
+	"github.com/mover-code/micro-util/xerr"
 
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
