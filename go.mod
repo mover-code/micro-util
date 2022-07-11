@@ -2,6 +2,8 @@ module github.com/mover-code/micro-util
 
 go 1.18
 
+replace github.com/btcsuite/btcd/chaincfg/chainhash => github.com/btcsuite/btcd/chaincfg/chainhash v1.0.1
+
 require (
 	github.com/Shopify/sarama v1.34.1
 	github.com/alibabacloud-go/darabonba-openapi v0.1.18
