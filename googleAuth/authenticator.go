@@ -6,21 +6,18 @@
 @Desc        : Google Authenticator  动态验证码
 ****************************/
 
-
 package googleAuth
 
-package main
-
 import (
-    "bytes"
-    "crypto/hmac"
-    "crypto/sha1"
-    "encoding/base32"
-    "encoding/binary"
-    "fmt"
-    "net/url"
-    "strings"
-    "time"
+	"bytes"
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/base32"
+	"encoding/binary"
+	"fmt"
+	"net/url"
+	"strings"
+	"time"
 )
 
 type GoogleAuth struct {
@@ -104,7 +101,7 @@ func (this *GoogleAuth) GetQrcodeUrl(user, secret string) string {
     height := "200"
     data := url.Values{}
     data.Set("data", qrcode)
-    return "https://api.qrserver.com/v1/create-qr-code/?" + data.Encode() + "&size=" + width + "x" + height + "&ecc=M";
+    return "https://api.qrserver.com/v1/create-qr-code/?" + data.Encode() + "&size=" + width + "x" + height + "&ecc=M"
 }
 
 // 验证动态码
@@ -117,27 +114,25 @@ func (this *GoogleAuth) VerifyCode(secret, code string) (bool, error) {
     return _code == code, nil
 }
 
-var err error
+// var err error
 
+// 开启二次认证 & example use
+// func initAuth(user string) (secret, code string) {
+// 秘钥
+//     secret = NewGoogleAuth().GetSecret()
+// fmt.Println("Secret:", secret)
 
-// 开启二次认证 & example use 
-func initAuth(user string) (secret, code string) {
-    // 秘钥
-    secret = NewGoogleAuth().GetSecret()
-    // fmt.Println("Secret:", secret)
+// 动态码(每隔30s会动态生成一个6位数的数字)
+//     code, err := NewGoogleAuth().GetCode(secret)
+//     fmt.Println("Code:", code, err)
 
-    // 动态码(每隔30s会动态生成一个6位数的数字)
-    code, err := NewGoogleAuth().GetCode(secret)
-    // fmt.Println("Code:", code, err)
+// 用户名
+//     qrCode := NewGoogleAuth().GetQrcode(user, code)
+// fmt.Println("Qrcode", qrCode)
 
-    // 用户名
-    qrCode := NewGoogleAuth().GetQrcode(user, code)
-    // fmt.Println("Qrcode", qrCode)
+// 打印二维码地址
+//     qrCodeUrl := NewGoogleAuth().GetQrcodeUrl(user, secret)
+// fmt.Println("QrcodeUrl", qrCodeUrl)
 
-    // 打印二维码地址
-    qrCodeUrl := NewGoogleAuth().GetQrcodeUrl(user, secret)
-    // fmt.Println("QrcodeUrl", qrCodeUrl)
-
-    return
-}
-
+//     return
+// }
