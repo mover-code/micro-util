@@ -30,14 +30,14 @@ func Init(endPoint, sender, key, from string, port int) *Conf {
     }
 }
 
-func (c *Conf) Send(reciver, body string) error {
+func (c *Conf) Send(reciver, subject, body string) error {
 
     m := gomail.NewMessage()
     m.SetHeader("From", c.From)
     m.SetHeader("To", reciver)
     //m.SetAddressHeader("Cc", "dan@example.com", "Dan")
-    m.SetHeader("Subject", "Welcome!")
-    m.SetBody("text/html", "Hello <b>Bob</b> and <i>Cora</i>!")
+    m.SetHeader("Subject", subject)
+    m.SetBody("text/html", body)
     //m.Attach("/home/Alex/lolcat.jpg")
     d := gomail.NewDialer(c.EndPoint, c.Port, c.Sender, c.Key)
     // Send the email to Bob, Cora and Dan.
