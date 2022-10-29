@@ -15,5 +15,9 @@ import (
 )
 
 func TestAdd(t *testing.T) {
-	log.Println(Init("54.199.110.63").Sh.Add(strings.NewReader("hello world")))
+	log.Println(Init("addr").Sh.Add(strings.NewReader("hello world")))
+}
+
+func TestAddNftStorage(t *testing.T) {
+	log.Println(AddStorage(strings.NewReader("today is rain"), "token"))
 }

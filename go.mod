@@ -2,7 +2,6 @@ module github.com/mover-code/micro-util
 
 go 1.18
 
-
 require (
 	github.com/Shopify/sarama v1.34.1
 	github.com/alibabacloud-go/darabonba-openapi v0.1.18
