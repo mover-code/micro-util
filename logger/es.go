@@ -2,7 +2,7 @@
  * @Author: small_ant xms.chnb@gmail.com
  * @Time: 2023-02-28 11:34:17
  * @LastAuthor: small_ant xms.chnb@gmail.com
- * @lastTime: 2023-02-28 14:18:45
+ * @lastTime: 2023-02-28 14:46:08
  * @FileName: es
  * @Desc: logs to elasticSearch
  *
@@ -33,13 +33,14 @@ type Info struct {
     FuncName string                `json:"funcName"`
     FileName string                `json:"fileName"`
     Line     int64                 `json:"line"`
+    Level    string                `json:"level"`
     Message  string                `json:"message"`            // 微博内容
     Created  time.Time             `json:"created,omitempty"`  // 创建时间
     Location string                `json:"location,omitempty"` //位置
     Suggest  *elastic.SuggestField `json:"suggest_field,omitempty"`
 }
 
-const mapping = `{"mappings":{"properties":{"funcName":{"type":"keyword"},"message":{"type":"text"},"fileName":{"type":"keyword"},"created":{"type":"date"},"line":{"type":"keyword"},"location":{"type":"geo_point"},"suggest_field":{"type":"completion"}}}}`
+const mapping = `{"mappings":{"properties":{"funcName":{"type":"keyword"},"message":{"type":"text"},"fileName":{"type":"keyword"},"created":{"type":"date"},"line":{"type":"keyword"},"level":{"type":"keyword"},"location":{"type":"geo_point"},"suggest_field":{"type":"completion"}}}}`
 
 func (e *EsLogger) Init() {
     cli, err := elastic.NewClient(
@@ -75,6 +76,7 @@ func (l *EsLogger) printLog(s, msg string, a ...interface{}) {
         Line:     int64(line),
         Created:  now,
         Message:  message,
+        Level:    s,
     }
     go func() {
         // put1, err :=
