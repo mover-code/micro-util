@@ -14,4 +14,4 @@
 |tools| 类型转换|
 |translate| google 翻译api|
 |request| 基于net/http 的封装http 请求|
-|logger| 日志组件,下一步优化kafka写入，至es 读取日志|
+|logger| 日志组件,目前直接写入至es,kibana 读取日志|

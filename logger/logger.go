@@ -89,6 +89,23 @@ func NewFileLogger(level, fp, fn string, maxSize int64) *FileLogger {
     return fl
 }
 
+func NewEsLogger(level, user, password, index string, url []string) *EsLogger {
+    logLevel, err := ParseLevel(level)
+    if err != nil {
+        panic(err)
+    }
+    es := &EsLogger{
+        level:    logLevel,
+        Uri:      url,
+        Index:    index,
+        UserName: user,
+        Password: password,
+    }
+    es.Init()
+    return es
+}
+
+
 func getInfo(n int) (funcName, fileName string, lineNo int) {
     pc, file, line, ok := runtime.Caller(n)
     if !ok {
