@@ -18,6 +18,7 @@ require (
 	github.com/zeromicro/go-zero v1.3.4
 	golang.org/x/text v0.3.7
 	google.golang.org/grpc v1.47.0
+	gopkg.in/LyricTian/lib.v2 v2.2.7
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
 
